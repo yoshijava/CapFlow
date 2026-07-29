@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CapFlow | 股市資金流向動態追蹤器 (Sliding Window Capital Flow)</title>
+  <meta name="description" content="互動式股市資金流動追蹤平台，運用時間滑動視窗 (Sliding Window) 技術分析全球股市、產業板塊與國家的資金即時輪動情況。">
+  <link rel="stylesheet" href="style.css">
+  <!-- Apache ECharts & World Map CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@4.9.0/map/js/world.js"></script>
+</head>
+<body>
+
+  <!-- Header Navigation -->
+  <header class="header">
+    <div class="logo-container">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+        </svg>
+      </div>
+      <div>
+        <h1 class="logo-title">CapFlow</h1>
+        <div class="logo-subtitle">全球股市資金流向動態追蹤系統</div>
+      </div>
+    </div>
+
+    <div class="header-meta">
+      <div class="market-badge">
+        <span class="pulse-dot"></span>
+        <span>Real-time Market Data (Yahoo Finance)</span>
+      </div>
+      <button class="refresh-btn" id="refresh-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M23 4v6h-6"></path>
+          <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+        </svg>
+        重新整理資料
+      </button>
+    </div>
+  </header>
+
+  <!-- Main App Container -->
+  <main class="container">
+    
+    <!-- Control Panel (Sliding Window & Playback Controls) -->
+    <section class="control-panel">
+      <div class="control-header">
+        <!-- Window Size Selector -->
+        <div class="window-selector">
+          <span class="control-label">時間滑動視窗 (Sliding Window):</span>
+          <div class="btn-group">
+            <button class="btn-option" data-window="5">5日 (週)</button>
+            <button class="btn-option active" data-window="10">10日 (雙週)</button>
+            <button class="btn-option" data-window="20">20日 (月)</button>
+            <button class="btn-option" data-window="60">60日 (季)</button>
+          </div>
+        </div>
+
+        <!-- Playback Controls -->
+        <div class="playback-controls">
+          <button class="play-btn" id="play-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="5 3 19 12 5 21 5 3"/>
+            </svg> 動態播放
+          </button>
+
+          <span class="control-label" style="margin-left:0.5rem">速度:</span>
+          <select class="speed-select" id="speed-select">
+            <option value="1">1x 正常</option>
+            <option value="2">2x 快速</option>
+            <option value="4">4x 極速</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Timeline Scrubber -->
+      <div class="timeline-box">
+        <div class="timeline-info">
+          <span class="control-label">歷史時間軸演變 (Timeline):</span>
+          <span class="current-window-display" id="window-date-display">載入中...</span>
+        </div>
+        <div class="slider-container">
+          <input type="range" class="timeline-slider" id="timeline-slider" min="0" max="100" value="0">
+        </div>
+      </div>
+    </section>
+
+    <!-- KPI Metrics Summary Bar -->
+    <section class="kpi-bar">
+      <div class="kpi-card">
+        <span class="kpi-title">視窗市場總資金淨流向</span>
+        <span class="kpi-value text-inflow" id="kpi-total-flow">-- 億美元</span>
+        <span class="kpi-sub">
+          <span id="current-date-badge" style="color:var(--accent-cyan)">--</span>
+        </span>
+      </div>
+
+      <div class="kpi-card">
+        <span class="kpi-title">最高資金流入產業 (Sector)</span>
+        <span class="kpi-value text-inflow" id="kpi-top-sector">--</span>
+        <span class="kpi-sub text-inflow" id="kpi-top-sector-sub">--</span>
+      </div>
+
+      <div class="kpi-card">
+        <span class="kpi-title">最大資金流出產業 (Sector)</span>
+        <span class="kpi-value text-outflow" id="kpi-bottom-sector">--</span>
+        <span class="kpi-sub text-outflow" id="kpi-bottom-sector-sub">--</span>
+      </div>
+    </section>
+
+    <!-- View Mode Navigation Tabs -->
+    <nav class="view-tabs">
+      <button class="tab-item active" data-tab="sectors">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="7" height="7"></rect>
+          <rect x="14" y="3" width="7" height="7"></rect>
+          <rect x="14" y="14" width="7" height="7"></rect>
+          <rect x="3" y="14" width="7" height="7"></rect>
+        </svg>
+        產業板塊資金流向熱力圖 (Sectors)
+      </button>
+
+      <button class="tab-item" data-tab="countries">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="2" y1="12" x2="22" y2="12"></line>
+          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+        </svg>
+        全球五大洲資金動向地圖 (World Continents Map)
+      </button>
+
+      <button class="tab-item" data-tab="matrix">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="20" x2="18" y2="10"></line>
+          <line x1="12" y1="20" x2="12" y2="4"></line>
+          <line x1="6" y1="20" x2="6" y2="14"></line>
+        </svg>
+        資金 vs 報酬率動態四象限 (Matrix)
+      </button>
+
+      <button class="tab-item" data-tab="race">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+          <polyline points="17 6 23 6 23 12"></polyline>
+        </svg>
+        動態資金流向競速榜 (Leaderboard)
+      </button>
+    </nav>
+
+    <!-- Main Visual Workspace Layout -->
+    <div class="workspace-grid">
+      <!-- Main Chart Display Card -->
+      <div class="chart-card">
+        <div class="chart-container" id="main-chart"></div>
+      </div>
+
+      <!-- Right Sidebar (Leaderboard & Asset Details) -->
+      <div class="side-panel">
+        <div class="rank-card">
+          <h2 class="card-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
+            </svg>
+            資金流向動態排行榜 (點擊查看詳情)
+          </h2>
+          <div class="rank-list" id="leaderboard-list">
+            <!-- Dynamic Ranking Items -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Asset Detail Inspection Modal -->
+  <div class="modal-backdrop" id="detail-modal">
+    <div class="modal-card">
+      <button class="modal-close" onclick="closeModal()">&times;</button>
+      <h2 id="modal-title" style="margin-bottom: 1rem; color: var(--accent-cyan);">--</h2>
+      <div id="modal-chart" style="width: 100%; height: 400px;"></div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
