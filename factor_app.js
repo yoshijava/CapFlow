@@ -380,6 +380,8 @@ function renderSimulatorView() {
     },
     series: [{
       type: 'gauge',
+      center: ['50%', '62%'],
+      radius: '90%',
       startAngle: 180,
       endAngle: 0,
       min: -15,
@@ -394,26 +396,39 @@ function renderSimulatorView() {
       },
       pointer: {
         icon: 'path://M12.8,0.7l12,40.1H0.7L12.8,0.7z',
-        length: '60%',
-        width: 10,
-        offsetCenter: [0, '-40%'],
+        length: '55%',
+        width: 8,
+        offsetCenter: [0, '-10%'],
         itemStyle: { color: '#00f0ff' }
       },
       axisLine: {
         lineStyle: { width: 18, color: [[0.5, '#f43f5e'], [1, '#10b981']] }
       },
-      axisTick: { distance: -18, length: 8, lineStyle: { color: '#fff', width: 1 } },
-      splitLine: { distance: -18, length: 14, lineStyle: { color: '#fff', width: 2 } },
-      axisLabel: { color: '#fff', distance: -25, fontSize: 11 },
+      axisTick: { distance: 10, length: 6, lineStyle: { color: 'rgba(255,255,255,0.3)', width: 1 } },
+      splitLine: { distance: 10, length: 12, lineStyle: { color: '#00f0ff', width: 2 } },
+      axisLabel: {
+        distance: 18,
+        color: '#9ca3af',
+        fontSize: 11,
+        formatter: (v) => `${v}%`
+      },
+      title: {
+        show: true,
+        offsetCenter: [0, '45%'],
+        color: '#9ca3af',
+        fontSize: 13,
+        fontWeight: 'bold'
+      },
       detail: {
         valueAnimation: true,
-        formatter: '{value}%',
-        color: '#ffffff',
-        fontSize: 26,
+        formatter: (v) => `${v >= 0 ? '+' : ''}${v.toFixed(2)}%`,
+        color: isPos ? COLOR_POS : COLOR_NEG,
+        fontSize: 32,
         fontFamily: 'Outfit',
-        offsetCenter: [0, '20%']
+        fontWeight: 'bold',
+        offsetCenter: [0, '15%']
       },
-      data: [{ value: parseFloat(predictedImpact.toFixed(2)), name: '預估影響 %' }]
+      data: [{ value: parseFloat(predictedImpact.toFixed(2)), name: `預估 ${sym} 股價受因子衝擊 %` }]
     }]
   };
 
