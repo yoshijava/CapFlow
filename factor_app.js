@@ -192,18 +192,18 @@ function renderHeatmapView() {
         return `<b>${xSym} vs ${ySym}</b><br/>皮爾森相關係數: <span style="font-weight:bold; color:${val>=0?'#10b981':'#f43f5e'}">${val >= 0 ? '+' : ''}${val}</span>`;
       }
     },
-    grid: { left: '12%', right: '8%', top: '18%', bottom: '15%' },
+    grid: { left: '12%', right: '6%', top: '16%', bottom: '24%' },
     xAxis: {
       type: 'category',
       data: symbols,
       splitArea: { show: true },
-      axisLabel: { color: '#00f0ff', fontWeight: 'bold' }
+      axisLabel: { color: '#00f0ff', fontWeight: 'bold', interval: 0, fontSize: 11 }
     },
     yAxis: {
       type: 'category',
       data: symbols,
       splitArea: { show: true },
-      axisLabel: { color: '#00f0ff', fontWeight: 'bold' }
+      axisLabel: { color: '#00f0ff', fontWeight: 'bold', fontSize: 11 }
     },
     visualMap: {
       min: -1.0,
@@ -211,11 +211,13 @@ function renderHeatmapView() {
       calculable: true,
       orient: 'horizontal',
       left: 'center',
-      bottom: '2%',
+      bottom: '1%',
+      itemWidth: 15,
+      itemHeight: 140,
       inRange: {
         color: ['#f43f5e', '#1e293b', '#10b981']
       },
-      textStyle: { color: '#ffffff' }
+      textStyle: { color: '#9ca3af', fontSize: 11 }
     },
     series: [{
       name: 'Correlation',
