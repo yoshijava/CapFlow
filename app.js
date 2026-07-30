@@ -118,8 +118,12 @@ function setupUIControls() {
   document.getElementById('refresh-btn').addEventListener('click', () => location.reload());
 }
 
+function getStepInterval() {
+  return Math.round(800 / currentState.playSpeed);
+}
+
 function getAnimDuration() {
-  return Math.round(500 / currentState.playSpeed);
+  return Math.round(320 / currentState.playSpeed);
 }
 
 function startPlayback() {
@@ -133,7 +137,7 @@ function startPlayback() {
     </svg> 暫停
   `;
   
-  const stepTime = getAnimDuration();
+  const stepTime = getStepInterval();
   currentState.timer = setInterval(() => {
     if (currentState.dateIndex < dates.length - 1) {
       currentState.dateIndex++;
