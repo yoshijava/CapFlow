@@ -436,7 +436,7 @@ function renderQuadrantMatrix(metrics) {
         parseFloat((m.totalDollarVol / 1e8).toFixed(1)),
         m.totalNetFlow
       ],
-      symbol: m.symbol,
+      assetSymbol: m.symbol,
       category: m.meta.category,
       itemStyle: {
         color: m.totalNetFlow >= 0 ? COLOR_INFLOW : COLOR_OUTFLOW,
@@ -485,6 +485,7 @@ function renderQuadrantMatrix(metrics) {
     },
     series: [{
       type: 'scatter',
+      symbol: 'circle',
       symbolSize: (data) => Math.max(16, Math.min(50, data[2] / 2)),
       data: data,
       label: {
