@@ -314,7 +314,7 @@ function renderBetasView() {
   const option = {
     backgroundColor: 'transparent',
     title: {
-      text: `${sym} 各因子敏感度迴歸 Beta ($\beta$)`,
+      text: `${sym} 各因子敏感度迴歸 Beta (β)`,
       subtext: '量化意義: 該因子變動 +1% 時，預期個股變動的百分比 (%)',
       left: 'left',
       textStyle: { color: '#f3f4f6', fontSize: 16, fontFamily: 'Outfit' },
