@@ -1,4 +1,4 @@
-name: Automated Daily Market Data Update
+name: Automated Daily Market Data & Factor Analytics Update
 
 on:
   schedule:
@@ -25,19 +25,21 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install yfinance pandas
+          pip install yfinance pandas numpy
 
-      - name: Fetch Latest Market Data
-        run: python fetch_data.py
+      - name: Fetch Latest Market Data & Factor Analytics
+        run: |
+          python fetch_data.py
+          python fetch_factor_data.py
 
       - name: Commit and Push Updated Data
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add data.json
+          git add data.json factor_data.json
           if git diff --staged --quiet; then
-            echo "No new market data changes to commit."
+            echo "No new market data or factor changes to commit."
           else
-            git commit -m "auto: refresh market data [skip ci]"
+            git commit -m "auto: refresh market & factor analytics data [skip ci]"
             git push
           fi

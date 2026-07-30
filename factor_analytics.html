@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stock Factor Analytics | 個股多因子相關性與敏感度分析系統</title>
+  <meta name="description" content="量化個股 (GOOG, AAPL, NVDA, TSM) 與大盤 (SPY/QQQ)、恐慌指數 (VIX)、美債殖利率 (10Y Yield)、美元指數 (UUP) 及原油的多因子相關性與動態敏感度。">
+  <link rel="stylesheet" href="style.css">
+  <!-- Apache ECharts CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+</head>
+<body>
+
+  <!-- Header Navigation -->
+  <header class="header">
+    <div class="logo-container">
+      <div class="logo-icon" style="background: linear-gradient(135deg, #a855f7, #3b82f6);">
+        <svg viewBox="0 0 24 24">
+          <path d="M18 20V10M12 20V4M6 20v-6" stroke="#07090e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+      </div>
+      <div>
+        <h1 class="logo-title">Factor Analytics</h1>
+        <div class="logo-subtitle">個股多因子相關性與敏感度分析模型</div>
+      </div>
+    </div>
+
+    <div class="header-meta">
+      <nav style="display:flex; gap:1rem;">
+        <a href="index.html" class="tab-item" style="text-decoration:none;">
+          ← 返回 CapFlow 資金流向
+        </a>
+      </nav>
+      <button class="refresh-btn" id="refresh-factor-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M23 4v6h-6"></path>
+          <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+        </svg>
+        更新因子數據
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="container">
+    
+    <!-- Stock Selection Bar -->
+    <section class="control-panel">
+      <div class="control-header" style="margin-bottom:0">
+        <div class="window-selector">
+          <span class="control-label" style="font-size:1rem; font-weight:700; color:var(--accent-cyan)">選擇目標分析個股 (Target Stock):</span>
+          <div class="btn-group" id="stock-selector-group">
+            <button class="btn-option active" data-symbol="GOOG">Alphabet (GOOG)</button>
+            <button class="btn-option" data-symbol="AAPL">Apple (AAPL)</button>
+            <button class="btn-option" data-symbol="NVDA">NVIDIA (NVDA)</button>
+            <button class="btn-option" data-symbol="TSM">台積電 (TSM)</button>
+          </div>
+        </div>
+        <div style="font-size:0.85rem; color:var(--text-muted); font-family:var(--font-mono);">
+          資料時間範圍: 近 1 年 (251 交易日對齊)
+        </div>
+      </div>
+    </section>
+
+    <!-- KPI Summary Bar for Selected Stock -->
+    <section class="kpi-bar">
+      <div class="kpi-card">
+        <span class="kpi-title">目前個股近 1 年累積報酬率</span>
+        <span class="kpi-value" id="kpi-stock-ret">--%</span>
+        <span class="kpi-sub" id="kpi-stock-name" style="color:var(--accent-cyan)">--</span>
+      </div>
+
+      <div class="kpi-card">
+        <span class="kpi-title">大盤 Beta 敏感度 ($\beta_{\text{SPY}}$)</span>
+        <span class="kpi-value" id="kpi-beta-spy">--</span>
+        <span class="kpi-sub" style="color:var(--text-muted)">相對於 S&P 500 的波幅比重</span>
+      </div>
+
+      <div class="kpi-card">
+        <span class="kpi-title">最強正相關因子 (Top Positive Factor)</span>
+        <span class="kpi-value text-inflow" id="kpi-top-pos-factor">--</span>
+        <span class="kpi-sub text-inflow" id="kpi-top-pos-val">--</span>
+      </div>
+
+      <div class="kpi-card">
+        <span class="kpi-title">最強負相關因子 (Top Inverse Factor)</span>
+        <span class="kpi-value text-outflow" id="kpi-top-neg-factor">--</span>
+        <span class="kpi-sub text-outflow" id="kpi-top-neg-val">--</span>
+      </div>
+    </section>
+
+    <!-- Analytics View Tabs -->
+    <nav class="view-tabs">
+      <button class="tab-item active" data-tab="heatmap">
+        🔥 多因子相關性矩陣熱力圖 (Correlation Heatmap)
+      </button>
+      <button class="tab-item" data-tab="timeline">
+        📈 因子 60日時間滾動演變 (Rolling Timeline)
+      </button>
+      <button class="tab-item" data-tab="betas">
+        📊 因子敏感度 $\beta$ 歸因分析 (Factor Betas)
+      </button>
+      <button class="tab-item" data-tab="simulator">
+        🎛 多因子情境模擬器 (Factor Scenario Simulator)
+      </button>
+    </nav>
+
+    <!-- Workspace Layout -->
+    <div class="workspace-grid" style="grid-template-columns: 2.2fr 1fr;">
+      
+      <!-- Main Chart Area -->
+      <div class="chart-card">
+        <div class="chart-container" id="factor-chart"></div>
+
+        <!-- Simulator Controls (Visible only in Simulator tab) -->
+        <div id="simulator-controls" style="display:none; padding:1rem; background:rgba(0,0,0,0.3); border-radius:12px; margin-top:1rem; border:1px solid var(--border-color);">
+          <h3 style="color:var(--accent-cyan); font-family:var(--font-heading); margin-bottom:1rem;">🎛 因子情境變動調整器 (Drag Factor Inputs)</h3>
+          
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1.25rem;">
+            <div>
+              <label style="font-size:0.85rem; color:var(--text-muted)">S&P 500 (SPY) 變動 %: <b id="val-sim-spy" style="color:#00f0ff">0.0%</b></label>
+              <input type="range" id="sim-spy" min="-10" max="10" step="0.5" value="0" style="width:100%">
+            </div>
+
+            <div>
+              <label style="font-size:0.85rem; color:var(--text-muted)">美債 10年期殖利率 (TNX) 變動 (bps): <b id="val-sim-tnx" style="color:#00f0ff">0 bps</b></label>
+              <input type="range" id="sim-tnx" min="-50" max="50" step="5" value="0" style="width:100%">
+            </div>
+
+            <div>
+              <label style="font-size:0.85rem; color:var(--text-muted)">VIX 恐慌指數 變動 %: <b id="val-sim-vix" style="color:#00f0ff">0.0%</b></label>
+              <input type="range" id="sim-vix" min="-30" max="50" step="1" value="0" style="width:100%">
+            </div>
+
+            <div>
+              <label style="font-size:0.85rem; color:var(--text-muted)">原油價格 (WTI Oil) 變動 %: <b id="val-sim-oil" style="color:#00f0ff">0.0%</b></label>
+              <input type="range" id="sim-oil" min="-20" max="20" step="1" value="0" style="width:100%">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Sidebar (Factor Description & Ranking) -->
+      <div class="side-panel">
+        <div class="rank-card">
+          <h2 class="card-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="16" x2="12" y2="12"></line>
+              <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+            因子庫說明與即時相關性
+          </h2>
+          <div class="rank-list" id="factor-list-panel">
+            <!-- Dynamic Factor List -->
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <script src="factor_app.js"></script>
+</body>
+</html>
