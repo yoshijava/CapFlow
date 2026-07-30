@@ -428,20 +428,24 @@ function renderWorldContinentMap(countryMetrics) {
 // 3. 2D Quadrant Matrix View
 function renderQuadrantMatrix(metrics) {
   const data = metrics.map(m => {
+    const dollarVolBn = m.totalDollarVol / 1e8;
+    const calcSize = Math.max(16, Math.min(50, dollarVolBn / 2));
     return {
       name: `${m.meta.flag ? m.meta.flag + ' ' : ''}${m.symbol}`,
+      symbol: 'circle',
+      symbolSize: calcSize,
       value: [
         parseFloat(m.flowIntensity.toFixed(2)),
         parseFloat(m.priceReturn.toFixed(2)),
-        parseFloat((m.totalDollarVol / 1e8).toFixed(1)),
+        parseFloat(dollarVolBn.toFixed(1)),
         m.totalNetFlow
       ],
       assetSymbol: m.symbol,
       category: m.meta.category,
       itemStyle: {
         color: m.totalNetFlow >= 0 ? COLOR_INFLOW : COLOR_OUTFLOW,
-        shadowBlur: 10,
-        shadowColor: m.totalNetFlow >= 0 ? 'rgba(16,185,129,0.5)' : 'rgba(244,63,94,0.5)'
+        shadowBlur: 12,
+        shadowColor: m.totalNetFlow >= 0 ? 'rgba(16,185,129,0.6)' : 'rgba(244,63,94,0.6)'
       }
     };
   });
@@ -486,7 +490,6 @@ function renderQuadrantMatrix(metrics) {
     series: [{
       type: 'scatter',
       symbol: 'circle',
-      symbolSize: (data) => Math.max(16, Math.min(50, data[2] / 2)),
       data: data,
       label: {
         show: true,
