@@ -56,7 +56,7 @@ async function initApp() {
     
     setupUIControls();
     initECharts();
-    updateDashboard();
+    updateDashboard(true); // Force reset on initial load
   } catch (err) {
     console.error('Initialization error:', err);
     document.getElementById('main-chart').innerHTML = 
@@ -75,7 +75,7 @@ function setupUIControls() {
       windowBtns.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       currentState.windowSize = parseInt(btn.dataset.window, 10);
-      updateDashboard();
+      updateDashboard(true);
     });
   });
 
@@ -87,7 +87,7 @@ function setupUIControls() {
   slider.addEventListener('input', (e) => {
     currentState.dateIndex = parseInt(e.target.value, 10);
     if (currentState.isPlaying) pausePlayback();
-    updateDashboard();
+    updateDashboard(false);
   });
 
   const playBtn = document.getElementById('play-btn');
@@ -111,11 +111,15 @@ function setupUIControls() {
       tabs.forEach(t => t.classList.remove('active'));
       tab.classList.add('active');
       currentState.activeTab = tab.dataset.tab;
-      updateChartLayout();
+      updateChartLayout(null, null, true); // Force reset on tab switch
     });
   });
   
   document.getElementById('refresh-btn').addEventListener('click', () => location.reload());
+}
+
+function getAnimDuration() {
+  return Math.round(500 / currentState.playSpeed);
 }
 
 function startPlayback() {
@@ -129,16 +133,16 @@ function startPlayback() {
     </svg> 暫停
   `;
   
-  const intervalMs = 600 / currentState.playSpeed;
+  const stepTime = getAnimDuration();
   currentState.timer = setInterval(() => {
     if (currentState.dateIndex < dates.length - 1) {
       currentState.dateIndex++;
       document.getElementById('timeline-slider').value = currentState.dateIndex;
-      updateDashboard();
+      updateDashboard(false);
     } else {
       pausePlayback();
     }
-  }, intervalMs);
+  }, stepTime);
 }
 
 function pausePlayback() {
@@ -187,7 +191,7 @@ function getCalculatedWindowMetrics(symbol, endIndex, windowSize) {
   };
 }
 
-function updateDashboard() {
+function updateDashboard(forceReset = false) {
   const currentDateStr = dates[currentState.dateIndex];
   const windowDays = currentState.windowSize;
   const startDateStr = dates[Math.max(0, currentState.dateIndex - windowDays + 1)];
@@ -213,7 +217,7 @@ function updateDashboard() {
   });
 
   updateKPICards(sectorMetrics, countryMetrics, marketNetFlowSum);
-  updateChartLayout(sectorMetrics, countryMetrics);
+  updateChartLayout(sectorMetrics, countryMetrics, forceReset);
   updateLeaderboard([...sectorMetrics, ...countryMetrics]);
 }
 
@@ -244,7 +248,7 @@ function initECharts() {
   window.addEventListener('resize', () => mainChart.resize());
 }
 
-function updateChartLayout(sectorMetrics = null, countryMetrics = null) {
+function updateChartLayout(sectorMetrics = null, countryMetrics = null, forceReset = false) {
   const windowDays = currentState.windowSize;
   if (!sectorMetrics || !countryMetrics) {
     sectorMetrics = [];
@@ -258,22 +262,24 @@ function updateChartLayout(sectorMetrics = null, countryMetrics = null) {
   }
 
   if (currentState.activeTab === 'sectors') {
-    renderTreemap(sectorMetrics, '美股產業板塊資金流向熱力圖 (Sector Treemap)');
+    renderTreemap(sectorMetrics, '美股產業板塊資金流向熱力圖 (Sector Treemap)', forceReset);
   } else if (currentState.activeTab === 'countries') {
-    renderWorldContinentMap(countryMetrics);
+    renderWorldContinentMap(countryMetrics, forceReset);
   } else if (currentState.activeTab === 'matrix') {
-    renderQuadrantMatrix([...sectorMetrics, ...countryMetrics]);
+    renderQuadrantMatrix([...sectorMetrics, ...countryMetrics], forceReset);
   } else if (currentState.activeTab === 'race') {
-    renderBarRace([...sectorMetrics, ...countryMetrics]);
+    renderBarRace([...sectorMetrics, ...countryMetrics], forceReset);
   }
 }
 
 // 1. Sector Treemap View
-function renderTreemap(metrics, titleText) {
+function renderTreemap(metrics, titleText, forceReset = false) {
+  const animDur = getAnimDuration();
   const data = metrics.map(m => {
     const isPositive = m.totalNetFlow >= 0;
     const flowBn = (m.totalNetFlow / 1e8).toFixed(2);
     return {
+      id: m.symbol,
       name: `${m.symbol}\n${m.meta.name.split(' ')[0]}\n${flowBn}億 (${m.priceReturn >= 0 ? '+' : ''}${m.priceReturn.toFixed(1)}%)`,
       value: m.totalDollarVol,
       netFlow: m.totalNetFlow,
@@ -290,6 +296,8 @@ function renderTreemap(metrics, titleText) {
 
   const option = {
     backgroundColor: 'transparent',
+    animationDurationUpdate: animDur,
+    animationEasingUpdate: 'cubicOut',
     title: {
       text: titleText,
       subtext: `方塊面積 = 累積成交金額 | 顏色深淺 = 資金淨流向強弱 (${dates[currentState.dateIndex]})`,
@@ -324,16 +332,17 @@ function renderTreemap(metrics, titleText) {
     }]
   };
 
-  mainChart.setOption(option, true);
+  mainChart.setOption(option, forceReset);
 }
 
 // 2. 五大洲全球地圖資金動向 (5-Continent World Geo Map)
-function renderWorldContinentMap(countryMetrics) {
-  // Scatter points on Geo map
+function renderWorldContinentMap(countryMetrics, forceReset = false) {
+  const animDur = getAnimDuration();
   const scatterData = countryMetrics.map(m => {
     const geoInfo = COUNTRY_GEO[m.symbol] || { continent: '其他', coord: [0, 0] };
     const flowBn = (m.totalNetFlow / 1e8).toFixed(2);
     return {
+      id: m.symbol,
       name: `${m.meta.flag} ${m.symbol} - ${m.meta.name.split(' ')[0]}`,
       symbolName: m.symbol,
       continent: geoInfo.continent,
@@ -351,6 +360,8 @@ function renderWorldContinentMap(countryMetrics) {
 
   const option = {
     backgroundColor: 'transparent',
+    animationDurationUpdate: animDur,
+    animationEasingUpdate: 'cubicOut',
     title: {
       text: '全球五大洲資金動向地圖 (World Continents Capital Rotation)',
       subtext: '地理位置動態脈衝: 🟢 資金淨流入 (Inflow) | 🔴 資金淨流出 (Outflow) | 脈衝圈大小: 成交量規模',
@@ -422,15 +433,17 @@ function renderWorldContinentMap(countryMetrics) {
     }]
   };
 
-  mainChart.setOption(option, true);
+  mainChart.setOption(option, forceReset);
 }
 
-// 3. 2D Quadrant Matrix View
-function renderQuadrantMatrix(metrics) {
+// 3. 2D Quadrant Matrix View (Smooth Floating Bubbles)
+function renderQuadrantMatrix(metrics, forceReset = false) {
+  const animDur = getAnimDuration();
   const data = metrics.map(m => {
     const dollarVolBn = m.totalDollarVol / 1e8;
     const calcSize = Math.max(16, Math.min(50, dollarVolBn / 2));
     return {
+      id: m.symbol,
       name: `${m.meta.flag ? m.meta.flag + ' ' : ''}${m.symbol}`,
       symbol: 'circle',
       symbolSize: calcSize,
@@ -452,6 +465,8 @@ function renderQuadrantMatrix(metrics) {
 
   const option = {
     backgroundColor: 'transparent',
+    animationDurationUpdate: animDur,
+    animationEasingUpdate: 'cubicOut',
     title: {
       text: '資金動向 vs 視窗報酬率 (四象限矩陣分析)',
       subtext: 'X軸: 資金淨流向強度 (%) | Y軸: 視窗價格報酬率 (%) | 圓圈大小: 成交量規模',
@@ -508,11 +523,12 @@ function renderQuadrantMatrix(metrics) {
     }]
   };
 
-  mainChart.setOption(option, true);
+  mainChart.setOption(option, forceReset);
 }
 
-// 4. Bar Race View
-function renderBarRace(metrics) {
+// 4. Bar Race View (60FPS Realtime Ranking Morphing)
+function renderBarRace(metrics, forceReset = false) {
+  const animDur = getAnimDuration();
   metrics.sort((a, b) => a.totalNetFlow - b.totalNetFlow);
 
   const categories = metrics.map(m => `${m.meta.flag ? m.meta.flag + ' ' : ''}${m.symbol} ${m.meta.name.split(' ')[0]}`);
@@ -521,6 +537,8 @@ function renderBarRace(metrics) {
 
   const option = {
     backgroundColor: 'transparent',
+    animationDurationUpdate: animDur,
+    animationEasingUpdate: 'linear',
     title: {
       text: '資金淨流向動態排行榜 (Net Flow Leaderboard)',
       subtext: `當前視窗 (${currentState.windowSize} 交易日) 累積淨流入 / 淨流出金額 (億美元)`,
@@ -537,10 +555,12 @@ function renderBarRace(metrics) {
     yAxis: {
       type: 'category',
       data: categories,
+      realtimeSort: true,
       axisLabel: { color: '#f3f4f6', fontSize: 11, fontWeight: 'bold' }
     },
     series: [{
       type: 'bar',
+      realtimeSort: true,
       data: values.map((v, i) => ({
         value: v,
         itemStyle: { color: colors[i], borderRadius: [0, 4, 4, 0] }
@@ -555,7 +575,7 @@ function renderBarRace(metrics) {
     }]
   };
 
-  mainChart.setOption(option, true);
+  mainChart.setOption(option, forceReset);
 }
 
 function updateLeaderboard(metrics) {
