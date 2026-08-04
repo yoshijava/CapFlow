@@ -13,13 +13,15 @@ STOCKS = {
     "AAPL": {"name": "Apple Inc.", "sector": "Consumer Tech", "flag": "🇺🇸"},
     "NVDA": {"name": "NVIDIA Corporation", "sector": "Semiconductor / AI", "flag": "🇺🇸"},
     "AMD":  {"name": "Advanced Micro Devices", "sector": "Semiconductor / AI", "flag": "🇺🇸"},
-    "TSM":  {"name": "Taiwan Semiconductor (TSMC)", "sector": "Semiconductor", "flag": "🇹🇼"}
+    "TSM":  {"name": "Taiwan Semiconductor (TSMC)", "sector": "Semiconductor", "flag": "🇹🇼"},
+    "SOXX": {"name": "iShares Semiconductor ETF", "sector": "Semiconductor ETF", "flag": "🇺🇸"}
 }
 
 # Impact Factors (Market, Macro & Commodities)
 FACTORS = {
     "SPY":    {"name": "S&P 500 大盤 (SPY)", "category": "Market", "desc": "美股大盤大方向連動性"},
     "QQQ":    {"name": "納斯達克 100 (QQQ)", "category": "Market", "desc": "科技板塊整體走勢"},
+    "SOXX":   {"name": "費半指數 ETF (SOXX)", "category": "Sector", "desc": "費城半導體產業鏈整體走勢"},
     "^VIX":   {"name": "VIX 恐慌指數 (VIX)", "category": "Market", "desc": "市場波動度與恐慌情緒"},
     "^TNX":   {"name": "美債 10年期殖利率 (10Y Yield)", "category": "Macro", "desc": "無風險利率與估值無形壓力"},
     "UUP":    {"name": "美元指數 ETF (UUP)", "category": "Macro", "desc": "強勢美元對跨國企業營收影響"},
@@ -27,7 +29,7 @@ FACTORS = {
     "XLK":    {"name": "科技板塊 ETF (XLK)", "category": "Sector", "desc": "同業產業輪動連動性"}
 }
 
-ALL_SYMBOLS = list(STOCKS.keys()) + list(FACTORS.keys())
+ALL_SYMBOLS = list(dict.fromkeys(list(STOCKS.keys()) + list(FACTORS.keys())))
 
 def compute_rolling_corr(s1, s2, window=60):
     """Compute rolling Pearson correlation between two pandas Series."""
