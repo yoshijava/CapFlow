@@ -113,8 +113,8 @@ function updateFactorDashboard() {
   if (!analysis) return;
 
   // KPI calculations
-  const retHist = analysis.return_history;
-  const cumulativeRet = retHist.reduce((acc, r) => acc + r, 0); // Approx sum return
+  const cumulativeRet = analysis.cum_return_1y !== undefined ? analysis.cum_return_1y : 0;
+  const latestPrice = analysis.latest_price !== undefined ? analysis.latest_price : 0;
   const spyBeta = analysis.factor_betas['SPY'] || 0.0;
 
   // Sort correlations to find top positive & top inverse factor
@@ -125,7 +125,7 @@ function updateFactorDashboard() {
 
   document.getElementById('kpi-stock-ret').innerText = `${cumulativeRet >= 0 ? '+' : ''}${cumulativeRet.toFixed(1)}%`;
   document.getElementById('kpi-stock-ret').className = `kpi-value ${cumulativeRet >= 0 ? 'text-inflow' : 'text-outflow'}`;
-  document.getElementById('kpi-stock-name').innerText = `${stockMeta.flag} ${sym} - ${stockMeta.name}`;
+  document.getElementById('kpi-stock-name').innerText = `${stockMeta.flag} ${sym} ($${latestPrice}) - ${stockMeta.name}`;
 
   document.getElementById('kpi-beta-spy').innerText = `${spyBeta > 0 ? '+' : ''}${spyBeta.toFixed(2)}`;
 

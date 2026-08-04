@@ -110,7 +110,13 @@ def main():
         price_hist = [round(float(v), 2) for v in df_close[stock_symbol].iloc[1:].values]
         return_hist = [round(float(v) * 100, 2) for v in stock_ret.values]
         
+        first_price = float(df_close[stock_symbol].iloc[0])
+        latest_price = float(df_close[stock_symbol].iloc[-1])
+        cum_ret = round(((latest_price - first_price) / first_price) * 100, 2)
+        
         analytics_output["stock_analysis"][stock_symbol] = {
+            "latest_price": round(latest_price, 2),
+            "cum_return_1y": cum_ret,
             "pearson_correlations": pearson_corrs,
             "factor_betas": betas,
             "rolling_correlations_60d": rolling_corrs,
