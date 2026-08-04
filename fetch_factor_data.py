@@ -12,6 +12,7 @@ STOCKS = {
     "GOOG": {"name": "Alphabet Inc. (Google)", "sector": "Technology / Comm", "flag": "🇺🇸"},
     "AAPL": {"name": "Apple Inc.", "sector": "Consumer Tech", "flag": "🇺🇸"},
     "NVDA": {"name": "NVIDIA Corporation", "sector": "Semiconductor / AI", "flag": "🇺🇸"},
+    "AMD":  {"name": "Advanced Micro Devices", "sector": "Semiconductor / AI", "flag": "🇺🇸"},
     "TSM":  {"name": "Taiwan Semiconductor (TSMC)", "sector": "Semiconductor", "flag": "🇹🇼"}
 }
 
