@@ -282,9 +282,12 @@ function renderTreemap(metrics, titleText, forceReset = false) {
   const data = metrics.map(m => {
     const isPositive = m.totalNetFlow >= 0;
     const flowBn = (m.totalNetFlow / 1e8).toFixed(2);
+    const sectorName = m.meta.name.split(' ')[0];
     return {
       id: m.symbol,
-      name: `${m.symbol}\n${m.meta.name.split(' ')[0]}\n${flowBn}億 (${m.priceReturn >= 0 ? '+' : ''}${m.priceReturn.toFixed(1)}%)`,
+      name: m.symbol,
+      sectorName: sectorName,
+      flowBn: flowBn,
       value: m.totalDollarVol,
       netFlow: m.totalNetFlow,
       priceReturn: m.priceReturn,
@@ -315,7 +318,7 @@ function renderTreemap(metrics, titleText, forceReset = false) {
         if (!d) return '';
         return `
           <div style="padding:4px 8px;">
-            <b style="font-size:14px; color:#00f0ff">${d.symbol}</b><br/>
+            <b style="font-size:14px; color:#00f0ff">${d.symbol} - ${d.sectorName}</b><br/>
             累積成交額: ${(d.value / 1e8).toFixed(2)} 億美元<br/>
             資金淨流向: <span style="color:${d.netFlow>=0?'#10b981':'#f43f5e'}">${(d.netFlow/1e8).toFixed(2)} 億美元</span><br/>
             視窗報酬率: <span style="color:${d.priceReturn>=0?'#10b981':'#f43f5e'}">${d.priceReturn.toFixed(2)}%</span>
@@ -331,7 +334,40 @@ function renderTreemap(metrics, titleText, forceReset = false) {
       top: '15%',
       roam: false,
       breadcrumb: { show: false },
-      label: { show: true, formatter: '{b}', fontSize: 13, fontWeight: 'bold', color: '#ffffff' },
+      label: {
+        show: true,
+        position: 'inside',
+        align: 'center',
+        verticalAlign: 'middle',
+        overflow: 'truncate',
+        fontSize: 12,
+        fontWeight: 'bold',
+        color: '#ffffff',
+        lineHeight: 16,
+        formatter: (params) => {
+          const d = params.data;
+          if (!d) return '';
+          const rect = params.rect || {};
+          const w = rect.width || 100;
+          const h = rect.height || 100;
+
+          const sign = d.netFlow >= 0 ? '+' : '';
+          const flowStr = `${sign}${d.flowBn}億`;
+          const retStr = `(${sign}${d.priceReturn.toFixed(1)}%)`;
+
+          // Ultra flat / narrow box (< 38px height)
+          if (h < 38) {
+            if (w < 80) return `${d.symbol}`;
+            return `${d.symbol} ${d.sectorName} ${flowStr}`;
+          }
+          // Medium height box (< 65px height)
+          if (h < 65) {
+            return `${d.symbol} ${d.sectorName}\n${flowStr} ${retStr}`;
+          }
+          // Large spacious box
+          return `${d.symbol}\n${d.sectorName}\n${flowStr} ${retStr}`;
+        }
+      },
       itemStyle: { borderColor: '#07090e', borderWidth: 2 }
     }]
   };
