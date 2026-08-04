@@ -132,13 +132,13 @@ function updateFactorDashboard() {
   if (topPos) {
     const posMeta = factorMetadata.factors[topPos];
     document.getElementById('kpi-top-pos-factor').innerText = `${posMeta ? posMeta.name.split(' ')[0] : topPos}`;
-    document.getElementById('kpi-top-pos-val').innerText = `相關係數: +${corrs[topPos].toFixed(2)}`;
+    document.getElementById('kpi-top-pos-val').innerText = `相關係數: +${corrs[topPos].toFixed(3)}`;
   }
 
   if (topNeg) {
     const negMeta = factorMetadata.factors[topNeg];
     document.getElementById('kpi-top-neg-factor').innerText = `${negMeta ? negMeta.name.split(' ')[0] : topNeg}`;
-    document.getElementById('kpi-top-neg-val').innerText = `相關係數: ${corrs[topNeg].toFixed(2)}`;
+    document.getElementById('kpi-top-neg-val').innerText = `相關係數: ${corrs[topNeg].toFixed(3)}`;
   }
 
   renderFactorChart();
@@ -459,7 +459,7 @@ function updateFactorSidebarList() {
           <div style="font-size:0.75rem; color:#9ca3af">${meta.desc}</div>
         </div>
         <div class="rank-metrics">
-          <div class="rank-flow ${isPos ? 'text-inflow' : 'text-outflow'}">Corr: ${isPos ? '+' : ''}${corr.toFixed(2)}</div>
+          <div class="rank-flow ${isPos ? 'text-inflow' : 'text-outflow'}">Corr: ${isPos ? '+' : ''}${corr.toFixed(3)}</div>
           <div class="rank-return" style="color:var(--text-muted)">Beta: ${beta >= 0 ? '+' : ''}${beta.toFixed(2)}</div>
         </div>
       </div>
