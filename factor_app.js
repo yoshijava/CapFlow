@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function initFactorApp() {
   try {
-    const resp = await fetch('factor_data.json');
+    const resp = await fetch('factor_data.json?v=' + Date.now());
     if (!resp.ok) throw new Error('Cannot load factor_data.json');
     factorRawData = await resp.json();
     
@@ -225,10 +225,10 @@ function renderHeatmapView() {
       data: heatmapData,
       label: {
         show: true,
-        formatter: (p) => p.data[2].toFixed(2),
+        formatter: (p) => p.data[2].toFixed(3),
         color: '#ffffff',
         fontWeight: 'bold',
-        fontSize: 11
+        fontSize: 10
       },
       emphasis: {
         itemStyle: {
