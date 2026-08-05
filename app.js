@@ -279,15 +279,22 @@ function updateChartLayout(sectorMetrics = null, countryMetrics = null, forceRes
 // 1. Sector Treemap View
 function renderTreemap(metrics, titleText, forceReset = false) {
   const animDur = getAnimDuration();
+  
+  // Total volume across all sectors in current window
+  const totalVolSum = metrics.reduce((sum, m) => sum + m.totalDollarVol, 0);
+
   const data = metrics.map(m => {
     const isPositive = m.totalNetFlow >= 0;
     const flowBn = (m.totalNetFlow / 1e8).toFixed(2);
     const sectorName = m.meta.name.split(' ')[0];
+    const volRatio = totalVolSum > 0 ? (m.totalDollarVol / totalVolSum) : 0.08;
+
     return {
       id: m.symbol,
       name: m.symbol,
       sectorName: sectorName,
       flowBn: flowBn,
+      volRatio: volRatio,
       value: m.totalDollarVol,
       netFlow: m.totalNetFlow,
       priceReturn: m.priceReturn,
@@ -334,35 +341,34 @@ function renderTreemap(metrics, titleText, forceReset = false) {
       top: '15%',
       roam: false,
       breadcrumb: { show: false },
+      labelLayout: {
+        hideOverlap: true
+      },
       label: {
         show: true,
         position: 'inside',
         align: 'center',
         verticalAlign: 'middle',
         overflow: 'truncate',
-        fontSize: 12,
+        fontSize: 11,
         fontWeight: 'bold',
         color: '#ffffff',
-        lineHeight: 16,
+        lineHeight: 14,
         formatter: (params) => {
           const d = params.data;
           if (!d) return '';
-          const rect = params.rect || {};
-          const w = rect.width || 100;
-          const h = rect.height || 100;
 
           const sign = d.netFlow >= 0 ? '+' : '';
           const flowStr = `${sign}${d.flowBn}億`;
           const retStr = `(${sign}${d.priceReturn.toFixed(1)}%)`;
 
-          // Ultra flat / narrow box (< 38px height)
-          if (h < 38) {
-            if (w < 80) return `${d.symbol}`;
-            return `${d.symbol} ${d.sectorName} ${flowStr}`;
+          // Small / flat box (volume ratio < 4.5%) -> 1 line
+          if (d.volRatio < 0.045) {
+            return `${d.symbol} ${flowStr}`;
           }
-          // Medium height box (< 65px height)
-          if (h < 65) {
-            return `${d.symbol} ${d.sectorName}\n${flowStr} ${retStr}`;
+          // Medium box (volume ratio < 7.5%) -> 2 lines
+          if (d.volRatio < 0.075) {
+            return `${d.symbol} ${d.sectorName}\n${flowStr}`;
           }
           // Large spacious box
           return `${d.symbol}\n${d.sectorName}\n${flowStr} ${retStr}`;
