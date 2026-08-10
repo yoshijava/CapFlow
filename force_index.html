@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini ForceIndex Monitor</title>
+    <link rel="stylesheet" href="force_index.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <header class="header">
+        <div class="logo-container">
+            <div class="logo-icon" style="background: linear-gradient(135deg, #ff3366, #00ff88); width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center;">
+                <svg viewBox="0 0 24 24" width="24" height="24" stroke="black" stroke-width="2" fill="none">
+                    <path d="M18 20V10M12 20V4M6 20v-6"></path>
+                </svg>
+            </div>
+            <div>
+                <h1 class="logo-title" style="margin:0; font-size:1.25rem; font-weight:700; background:linear-gradient(90deg, #fff, #a0aab5); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">CapFlow</h1>
+                <div class="logo-subtitle" style="font-size:0.75rem; color:#8b949e; letter-spacing:1px; text-transform:uppercase;">ForceIndex</div>
+            </div>
+        </div>
+
+        <div class="header-meta" style="display:flex; align-items:center; gap:1.5rem;">
+            <nav style="display:flex; gap:1rem;">
+                <a href="index.html" class="tab-item" style="text-decoration:none; color:#8b949e; transition:color 0.2s;">
+                    ← CapFlow 資金流向
+                </a>
+                <a href="factor_analytics.html" class="tab-item" style="text-decoration:none; color:#8b949e; transition:color 0.2s;">
+                    📊 因子分析
+                </a>
+            </nav>
+        </div>
+    </header>
+    <div class="dashboard-container">
+        <!-- Sidebar / Console -->
+        <aside class="sidebar">
+            <div class="bot-status">
+                <div class="status-indicator live"></div>
+                <h2>SYSTEM.LIVE</h2>
+                <div class="time-display" id="clock">00:00:00</div>
+            </div>
+            
+            <div class="stats-panel">
+                <div class="stat-card">
+                    <span class="stat-label">MARKETS SCANNED</span>
+                    <span class="stat-value" id="markets-scanned">50 / 50</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">DATA LAST UPDATE</span>
+                    <span class="stat-value" id="last-update">--:--:--</span>
+                </div>
+            </div>
+
+            <div class="log-console">
+                <h3>SYSTEM LOG</h3>
+                <div class="log-entries" id="execution-logs">
+                    <!-- Logs will be appended here via JS -->
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Grid -->
+        <main class="market-grid-container">
+            <header class="grid-header">
+                <h1>MULTI-MARKET SCANNER</h1>
+                <div class="pulse-ring"></div>
+            </header>
+            <div class="market-grid" id="market-grid">
+                <!-- Market cards will be injected here via JS -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Chart Modal Overlay -->
+    <div id="chart-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Symbol Analysis</h2>
+                <button id="modal-close" class="close-btn">&times;</button>
+            </div>
+            <div class="chart-container">
+                <canvas id="quadrantChart"></canvas>
+            </div>
+            <div id="modal-loading" class="modal-loading hidden">Loading data...</div>
+        </div>
+    </div>
+
+    <script src="force_index.js"></script>
+</body>
+</html>
