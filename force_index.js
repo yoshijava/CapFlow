@@ -1,5 +1,5 @@
 const SYMBOLS = [
-    'QQQ', 'VOO', 'AAPL', 'MSFT', 'AMZN', 'NVDA', 'META', 'AVGO', 'TSLA', 'GOOGL', 'GOOG', 'COST', 
+    'QQQ', 'VOO', 'EWT', 'AAPL', 'MSFT', 'AMZN', 'NVDA', 'META', 'AVGO', 'TSLA', 'GOOGL', 'GOOG', 'COST', 
     'PEP', 'AMD', 'TMUS', 'NFLX', 'CSCO', 'INTC', 'ADBE', 'QCOM', 'TXN', 'AMGN', 
     'INTU', 'HON', 'AMAT', 'ISRG', 'CMCSA', 'BKNG', 'SBUX', 'GILD', 'VRTX', 'MDLZ', 
     'LRCX', 'REGN', 'ADP', 'MU', 'PANW', 'MELI', 'KLAC', 'SNPS', 'CDNS', 'CSX', 
