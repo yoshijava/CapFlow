@@ -255,7 +255,11 @@ async function openChartModal(symbol) {
                             color: '#8b949e',
                             callback: (value) => (value / 1000000).toFixed(0) + 'M'
                         },
-                        grid: { drawOnChartArea: false }
+                        grid: { 
+                            drawOnChartArea: true,
+                            color: (ctx) => ctx.tick.value === 0 ? 'rgba(255, 255, 255, 0.5)' : 'transparent',
+                            lineWidth: (ctx) => ctx.tick.value === 0 ? 2 : 0
+                        }
                     },
                     y2: {
                         type: 'linear',
