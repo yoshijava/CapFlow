@@ -6,8 +6,8 @@ const SYMBOLS = [
     'MAR', 'PYPL', 'CTAS', 'ORLY', 'ABNB', 'MNST', 'PCAR', 'LULU', 'ASML', 'CRWD', 
     'NXPI', 'FTNT', 'DXCM', 'ADSK', 'MCHP', 'CHTR', 'KDP', 'PAYX', 'IDXX', 'ODFL', 
     'ROST', 'KHC', 'MRVL', 'CPRT', 'EXC', 'EA', 'WBD', 'FAST', 'FANG', 'CTSH', 
-    'BIIB', 'CEG', 'VRSK', 'ZS', 'CTRA', 'EBAY', 'ILMN', 'SIRI', 'SGEN', 'WBA', 
-    'JD', 'PDD', 'ALGN', 'TEAM', 'NTES', 'ZM', 'DOCU', 'SPLK', 'OKTA', 'SWKS', 
+    'BIIB', 'CEG', 'VRSK', 'ZS', 'EBAY', 'ILMN', 'SIRI', 
+    'JD', 'PDD', 'ALGN', 'TEAM', 'NTES', 'ZM', 'DOCU', 'OKTA', 'SWKS', 
     'CDW', 'CHKP', 'DLTR', 'ENPH', 'EXPE', 'INCY', 'LCID', 'PTON', 'VRSN'
 ];
 
