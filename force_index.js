@@ -155,8 +155,6 @@ async function openChartModal(symbol) {
         const fi13Data = data.map(pt => pt.fi13);
         const fi2Data = data.map(pt => pt.fi2);
 
-        const fiColors = fi13Data.map(val => val >= 0 ? 'rgba(0, 255, 136, 0.8)' : 'rgba(255, 51, 102, 0.8)');
-
         quadrantChartInstance = new Chart(ctx, {
             type: 'bar',
             data: {
@@ -175,9 +173,13 @@ async function openChartModal(symbol) {
                     },
                     {
                         label: 'Force Index (13 EMA)',
-                        type: 'bar',
+                        type: 'line',
                         data: fi13Data,
-                        backgroundColor: fiColors,
+                        borderColor: '#3fb950', // GitHub green
+                        backgroundColor: '#3fb950',
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        tension: 0.1,
                         yAxisID: 'y1'
                     },
                     {
