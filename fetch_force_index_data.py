@@ -64,6 +64,7 @@ def fetch_history(symbol):
         
         df['PrevClose'] = df['Close'].shift(1)
         df['FI1'] = (df['Close'] - df['PrevClose']) * df['Volume']
+        df['FI2'] = df['FI1'].ewm(span=2, adjust=False).mean()
         df['FI13'] = df['FI1'].ewm(span=13, adjust=False).mean()
         
         data_points = []
@@ -75,6 +76,7 @@ def fetch_history(symbol):
                 "date": row['Date'].strftime('%Y-%m-%d'),
                 "close": row['Close'],
                 "fi1": row['FI1'],
+                "fi2": row['FI2'],
                 "fi13": row['FI13']
             })
             

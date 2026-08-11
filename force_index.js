@@ -153,6 +153,7 @@ async function openChartModal(symbol) {
         const labels = data.map(pt => pt.date);
         const closeData = data.map(pt => pt.close);
         const fi13Data = data.map(pt => pt.fi13);
+        const fi2Data = data.map(pt => pt.fi2);
 
         const fiColors = fi13Data.map(val => val >= 0 ? 'rgba(0, 255, 136, 0.8)' : 'rgba(255, 51, 102, 0.8)');
 
@@ -177,6 +178,17 @@ async function openChartModal(symbol) {
                         type: 'bar',
                         data: fi13Data,
                         backgroundColor: fiColors,
+                        yAxisID: 'y1'
+                    },
+                    {
+                        label: 'Force Index (2 EMA)',
+                        type: 'line',
+                        data: fi2Data,
+                        borderColor: '#ff7b72',
+                        backgroundColor: '#ff7b72',
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        tension: 0.1,
                         yAxisID: 'y1'
                     }
                 ]
