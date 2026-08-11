@@ -75,6 +75,7 @@ def fetch_history(symbol):
             data_points.append({
                 "date": row['Date'].strftime('%Y-%m-%d'),
                 "close": row['Close'],
+                "volume": int(row['Volume']),
                 "fi1": row['FI1'],
                 "fi2": row['FI2'],
                 "fi13": row['FI13']

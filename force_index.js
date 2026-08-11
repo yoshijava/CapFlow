@@ -154,12 +154,20 @@ async function openChartModal(symbol) {
         const closeData = data.map(pt => pt.close);
         const fi13Data = data.map(pt => pt.fi13);
         const fi2Data = data.map(pt => pt.fi2);
+        const volumeData = data.map(pt => pt.volume);
 
         quadrantChartInstance = new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: labels,
                 datasets: [
+                    {
+                        label: 'Volume',
+                        type: 'bar',
+                        data: volumeData,
+                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                        yAxisID: 'y2'
+                    },
                     {
                         label: 'Price',
                         type: 'line',
@@ -214,7 +222,7 @@ async function openChartModal(symbol) {
                                     label += ': ';
                                 }
                                 if (context.parsed.y !== null) {
-                                    if (context.dataset.yAxisID === 'y1') {
+                                    if (context.dataset.yAxisID === 'y1' || context.dataset.yAxisID === 'y2') {
                                         label += (context.parsed.y / 1000000).toFixed(2) + 'M';
                                     } else {
                                         label += '$' + context.parsed.y.toFixed(2);
@@ -247,6 +255,14 @@ async function openChartModal(symbol) {
                             color: '#8b949e',
                             callback: (value) => (value / 1000000).toFixed(0) + 'M'
                         },
+                        grid: { drawOnChartArea: false }
+                    },
+                    y2: {
+                        type: 'linear',
+                        display: false,
+                        position: 'right',
+                        min: 0,
+                        suggestedMax: Math.max(...volumeData) * 4,
                         grid: { drawOnChartArea: false }
                     }
                 }
